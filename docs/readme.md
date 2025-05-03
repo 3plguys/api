@@ -2,107 +2,188 @@
 
 Welcome to the official documentation for the 3PLGuys Public API.
 
-This API enables seamless integration with our logistics and warehouse management systems. You can use it to query inventory, manage shipments, and synchronize with external platforms.
+This API provides access to real-time logistics, inventory, and warehouse operations. You can query product stock, manage shipments, track tasks, and integrate with ERP systems or custom portals.
 
-# Swagger / OpenAPI
+---
 
-You can explore and test our API using Swagger UI.
+## 🔗 Swagger / OpenAPI
 
-- [Swagger UI](https://api.3plguys.com)
-- [OpenAPI JSON](https://api.3plguys.com/openapi.json)
-- [OpenAPI YAML](https://api.3plguys.com/openapi.yaml)
+Use our OpenAPI 3.0-compliant spec to explore, generate client SDKs, or test endpoints.
 
-Use with Postman, Insomnia, Stoplight, etc.
+* **Swagger UI:** [https://api.3plguys.com](https://api.3plguys.com)
+* **OpenAPI JSON:** [https://api.3plguys.com/openapi.json](https://api.3plguys.com/openapi.json)
+* **OpenAPI YAML:** [https://api.3plguys.com/openapi.yaml](https://api.3plguys.com/openapi.yaml)
 
+Compatible with:
 
-# Authentication
+* Postman (Import OpenAPI)
+* Insomnia
+* ReDoc
+* Swagger Codegen / OpenAPI Generator
 
-All API requests require OAuth 2.0 authorization.
+---
 
-## Authorization Flow
+## 🔐 Authentication (OAuth 2.0)
 
-1. Redirect user to authorize endpoint.
-2. Exchange code for access token.
-3. Use access token in requests.
+All endpoints require Bearer token authentication using the Authorization Code Flow.
 
-## Example
+### Steps
 
-**Step 1** – Authorize:
+**Step 1: Redirect to authorize**
 
-**GET**
-```
-https://account.3plguys.com/auth/app-authorize
-?response_type=code
-&client_id=YOUR_CLIENT_ID
-&redirect_uri=https://yourapp.com/callback
-```
+GET
+[https://account.3plguys.com/auth/app-authorize](https://account.3plguys.com/auth/app-authorize)
+?response\_type=code
+\&client\_id=YOUR\_CLIENT\_ID
+\&redirect\_uri=[https://yourapp.com/callback](https://yourapp.com/callback)
+\&scope=inventory shipments
+\&state=random\_string
 
-**Step 2** – Token Exchange:
+**Step 2: Exchange code for tokens**
 
-**POST**
-```
-https://api.3plguys.com/oauth/token?
-grant_type=authorization_code
-code=CODE
-client_id=YOUR_CLIENT\_ID
-client_secret=YOUR_SECRET
-```
+POST
+[https://api.3plguys.com/oauth/token](https://api.3plguys.com/oauth/token)
+Body (x-www-form-urlencoded):
+grant\_type=authorization\_code
+code=RECEIVED\_CODE
+client\_id=YOUR\_CLIENT\_ID
+client\_secret=YOUR\_CLIENT\_SECRET
+redirect\_uri=[https://yourapp.com/callback](https://yourapp.com/callback)
 
-**Step 3** - Usage
+**Step 3: Use the access token**
 
-```
-Authorization: Bearer YOUR_TOKEN
-```
+Header:
+Authorization: Bearer YOUR\_ACCESS\_TOKEN
 
-# API Environments
+**Token Expiration:** 1 hour
+**Refresh Token:** Valid for 30 days
 
-## Production
-- URL: `https://api.3plguys.com`
-- Live data
-- Rate limited
+---
 
-## Sandbox
-- URL: `https://sandbox.3plguys.com`
-- Mock data
-- No real orders
+## 🌍 API Environments
 
-# Rate Limits
+Use environment variables to switch between sandbox and production:
 
-API is rate-limited to ensure fair usage.
+| Environment | URL                                                        | Purpose            | Rate Limits | Data        |
+| ----------- | ---------------------------------------------------------- | ------------------ | ----------- | ----------- |
+| Sandbox     | [https://sandbox.3plguys.com](https://sandbox.3plguys.com) | Testing & dev only | Higher      | Mock        |
+| Production  | [https://api.3plguys.com](https://api.3plguys.com)         | Live operations    | Enforced    | Real orders |
 
-| Endpoint Category     | Limit           | Window     |
-|-----------------------|------------------|------------|
-| Authentication        | 10 requests      | per minute |
-| Inventory Queries     | 300 requests     | per minute |
-| Shipment Creation     | 60 requests      | per minute |
-| Webhook Management    | 30 requests      | per minute |
+Use separate credentials for each environment.
 
-**Error:** `429 Too Many Requests`
+---
 
-# Payload Size
+## 🚦 Rate Limits
 
-To ensure stability, we enforce payload limits.
+To maintain stability and fairness:
 
-| Type            | Max Size |
-|-----------------|----------|
-| Request Body    | 10 MB    |
-| Response Body   | 25 MB    |
+| Endpoint Category  | Limit        | Window     |
+| ------------------ | ------------ | ---------- |
+| Authentication     | 10 requests  | per minute |
+| Inventory Queries  | 300 requests | per minute |
+| Shipment Creation  | 60 requests  | per minute |
+| Webhook Management | 30 requests  | per minute |
 
-## Batch Guidelines
-- Max 1000 items per request
-- Use pagination for large data
+You’ll receive these headers on every response:
 
+* `X-RateLimit-Limit`
+* `X-RateLimit-Remaining`
+* `X-RateLimit-Reset`
 
+**If limit exceeded:** `429 Too Many Requests`
 
-# Reporting Issues & Feature Requests
+---
 
-Use GitHub Issues to report:
+## 📦 Payload Size Limits
 
-- Bugs
-- Feature ideas
-- API suggestions
+| Type          | Max Size |
+| ------------- | -------- |
+| Request Body  | 10 MB    |
+| Response Body | 25 MB    |
+
+### Best Practices:
+
+* Max 1000 items per batch request
+* Use pagination for large queries
+* Use filters to minimize payload size
+
+---
+
+## 🧪 Pagination Example
+
+GET
+/v0/inventory?limit=100\&page=2
+
+Response headers:
+
+* `X-Pagination-Total`: 1250
+* `X-Pagination-Pages`: 13
+* `X-Pagination-Current`: 2
+* `X-Pagination-Limit`: 100
+
+---
+
+## 🔄 Long-Running Tasks
+
+Some operations (e.g. bulk inventory updates) return `202 Accepted`. A task ID is provided for polling status:
+
+GET
+/v0/tasks/{taskId}
+
+States:
+
+* `pending`
+* `processing`
+* `completed`
+* `failed`
+
+---
+
+## 🪝 Webhooks
+
+You can register webhook endpoints to receive real-time updates:
+
+* Inventory changes
+* Shipment status
+* Errors
+
+Requirements:
+
+* HTTPS URL
+* Respond with 2xx status
+* Retry logic for failures is automatic
+
+---
+
+## 🧰 Tools and Libraries
+
+You can auto-generate SDKs using the OpenAPI file via:
+
+* [OpenAPI Generator](https://openapi-generator.tech/)
+* [Swagger Codegen](https://github.com/swagger-api/swagger-codegen)
+
+---
+
+## 🛠 Reporting Issues or Requesting Features
+
+Use [GitHub Issues](https://github.com/3plguys/api/issues) to report:
+
+* Bugs (include endpoint, payload, and env)
+* Feature requests (with use case)
+* General questions
 
 Please include:
-- Endpoint and request
-- Expected vs actual result
-- Sandbox or Production environment
+
+* Endpoint and full request info (redact tokens)
+* Expected vs actual behavior
+* Sandbox or Production
+* Steps to reproduce
+
+---
+
+## 💬 Support
+
+For direct technical questions:
+
+* Email: [support@3plguys.com](mailto:support@3plguys.com)
+* GitHub: [github.com/3plguys/api](https://github.com/3plguys/api)
