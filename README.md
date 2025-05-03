@@ -15,7 +15,10 @@ This repo serves as a central hub for:
 
 ## 📬 Support
 
-For direct inquiries: [support@3plguys.com](mailto:support@3plguys.com)  
+Developer Center [https://developer.3plguys.com](https://developer.3plguys.com)
+
+For direct inquiries: [info@3plguys.com](mailto:info@3plguys.com)  
+
 Main website: [https://3plguys.com](https://3plguys.com)
 
 ---
