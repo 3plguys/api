@@ -9,7 +9,7 @@ This repo serves as a central hub for:
 
 ## 📂 Structure
 
-- `swagger/` – Swagger/OpenAPI JSON/YAML files
+- `openapi/` – Swagger/OpenAPI JSON/YAML files
 - `changelog.md` – API version changes and updates
 - `issues/` – Use GitHub Issues to report problems or request features
 
