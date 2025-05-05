@@ -471,7 +471,7 @@
                 "type": "oauth2",
                 "flows": {
                     "authorizationCode": {
-                        "authorizationUrl": "http://account.3plguys.com/auth/app-authorize",
+                        "authorizationUrl": "https://account.3plguys.com/auth/app-authorize",
                         "scopes": {
                             "user-account": "Read users",
                             "inventory": "Read inventory",
@@ -479,7 +479,7 @@
                             "shipments": "Read shipments",
                             "organization": "Read organizations"
                         },
-                        "tokenUrl": "http://api.3plguys.com/oauth/token"
+                        "tokenUrl": "https://api.3plguys.com/oauth/token"
                     }
                 }
             }
@@ -571,7 +571,7 @@
                     "timestamp": {
                         "format": "date-time",
                         "type": "string",
-                        "example": "2025-05-03T21:26:01.539Z"
+                        "example": "2025-05-04T00:53:29.750Z"
                     }
                 },
                 "required": [
